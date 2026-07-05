@@ -142,7 +142,11 @@ void main() async {
 
           await tester.pumpAndSettle();
 
-          await player.dispose();
+          addTearDown(() async {
+            // Do not call dispose until the test has finished,
+            // as expectLater is not awaited.
+            await player.dispose();
+          });
         },
         skip:
             // FIXME(gustl22): [FLAKY] macos 13 fails on live streams.
