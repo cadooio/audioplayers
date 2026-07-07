@@ -17,6 +17,14 @@ const _defaultTimeout = Duration(seconds: 30);
 final isLinux = !kIsWeb && defaultTargetPlatform == TargetPlatform.linux;
 final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
+bool canDetermineDuration(SourceTestData td) {
+  // TODO(gustl22): cannot determine duration for VBR on Linux
+  if (td.duration == null) {
+    return true;
+  }
+  return !isLinux || !td.isVBR;
+}
+
 void main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   await PlatformFeatures.ensureInitialized();
@@ -121,6 +129,7 @@ void main() async {
             ),
           );
         },
+        skip: !canDetermineDuration(td),
       );
     }
 
@@ -347,6 +356,7 @@ void main() async {
               testData: td,
             );
           },
+          skip: !canDetermineDuration(td),
         );
       }
     }
