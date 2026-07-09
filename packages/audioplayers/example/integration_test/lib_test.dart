@@ -141,9 +141,8 @@ void main() async {
           await player.stop();
           expect(player.state, PlayerState.stopped);
 
-          await futureExpectations;
+          await futureExpectations.timeout(const Duration(seconds: 10));
 
-          await tester.pumpAndSettle();
           await player.dispose();
         },
         skip:
@@ -154,6 +153,7 @@ void main() async {
                 (isAndroid &&
                     !td.isLiveStream &&
                     td.duration! < const Duration(seconds: 1)),
+        timeout: const Timeout(Duration(minutes: 2)),
       );
     }
 
