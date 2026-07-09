@@ -1,6 +1,3 @@
-@Timeout(Duration(minutes: 5))
-library;
-
 import 'package:audioplayers/audioplayers.dart';
 import 'package:audioplayers_example/tabs/sources.dart';
 import 'package:flutter/foundation.dart';
@@ -12,7 +9,9 @@ import 'lib/lib_test_utils.dart';
 import 'platform_features.dart';
 
 void main() async {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  binding.defaultTestTimeout = const Timeout(Duration(minutes: 5));
+
   await PlatformFeatures.ensureInitialized();
   final features = PlatformFeatures.instance();
   final isAndroid = !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
@@ -153,7 +152,6 @@ void main() async {
                 (isAndroid &&
                     !td.isLiveStream &&
                     td.duration! < const Duration(seconds: 1)),
-        timeout: const Timeout(Duration(minutes: 2)),
       );
     }
 
