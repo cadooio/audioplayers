@@ -12,7 +12,7 @@ import 'platform_features.dart';
 
 void main() async {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  binding.defaultTestTimeout = const Timeout(Duration(minutes: 10));
+  binding.defaultTestTimeout = const Timeout(Duration(minutes: 5));
 
   await PlatformFeatures.ensureInitialized();
   final features = PlatformFeatures.instance();
