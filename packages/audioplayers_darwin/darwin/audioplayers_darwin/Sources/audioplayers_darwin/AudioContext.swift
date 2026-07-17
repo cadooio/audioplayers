@@ -1,6 +1,10 @@
 import MediaPlayer
 
 #if os(iOS)
+  // Explicit import: the iPhoneOS 26.4 SDK no longer re-exports the AVFAudio
+  // Swift overlay through MediaPlayer, so AVAudioSession.Category degrades to
+  // its ObjC NSString typedef and loses .playback/.ambient/etc.
+  import AVFAudio
   struct AudioContext {
     let category: AVAudioSession.Category
     let options: [AVAudioSession.CategoryOptions]
