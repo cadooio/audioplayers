@@ -17,6 +17,11 @@ Pod::Spec.new do |s|
   s.osx.dependency 'FlutterMacOS'
   s.ios.deployment_target = '13.0'
   s.osx.deployment_target = '10.15'
+  # Pin the Swift language mode. Without it the Xcode 26.4 image compiles the
+  # pod in its default (newer) mode, where the iPhoneOS 26.4 SDK drops the
+  # nested AVAudioSession.Category refinements (flutter_tts, which pins 4.2,
+  # compiles the same API fine on that image).
+  s.swift_version = '5.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }

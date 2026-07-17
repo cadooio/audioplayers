@@ -1,18 +1,36 @@
 import MediaPlayer
 
 #if os(iOS)
-  // Explicit import: on the iPhoneOS 26.4 SDK the AVAudioSession.Category
-  // struct refinement only comes in with AVFoundation's Swift overlay — via
-  // MediaPlayer (or bare AVFAudio) it degrades to the ObjC NSString typedef
-  // and loses .playback/.ambient/etc. flutter_tts compiles the same member
-  // syntax on this SDK with exactly this import.
   import AVFoundation
+
+  // The iPhoneOS 26.4 SDK exposes the Swift 4.2-era nested refinements
+  // (AVAudioSession.Category.playback) only to targets compiling in Swift
+  // 4/5 language mode; in newer modes the type degrades to the ObjC
+  // NSString typedef and only the flat global constants exist. Resolve the
+  // six categories once, valid in either mode. (The podspec also pins
+  // swift_version 5.0, so the >=6.0 branch is a safety net.)
+  #if swift(>=6.0)
+    private let kCategoryAmbient = AVAudioSessionCategoryAmbient
+    private let kCategorySoloAmbient = AVAudioSessionCategorySoloAmbient
+    private let kCategoryPlayback = AVAudioSessionCategoryPlayback
+    private let kCategoryRecord = AVAudioSessionCategoryRecord
+    private let kCategoryPlayAndRecord = AVAudioSessionCategoryPlayAndRecord
+    private let kCategoryMultiRoute = AVAudioSessionCategoryMultiRoute
+  #else
+    private let kCategoryAmbient = AVAudioSession.Category.ambient
+    private let kCategorySoloAmbient = AVAudioSession.Category.soloAmbient
+    private let kCategoryPlayback = AVAudioSession.Category.playback
+    private let kCategoryRecord = AVAudioSession.Category.record
+    private let kCategoryPlayAndRecord = AVAudioSession.Category.playAndRecord
+    private let kCategoryMultiRoute = AVAudioSession.Category.multiRoute
+  #endif
+
   struct AudioContext {
     let category: AVAudioSession.Category
     let options: [AVAudioSession.CategoryOptions]
 
     init() {
-      self.category = .playback
+      self.category = kCategoryPlayback
       self.options = []
     }
 
@@ -36,7 +54,11 @@ import MediaPlayer
       let combinedOptions = options.reduce(AVAudioSession.CategoryOptions()) {
         [$0, $1]
       }
-      try session.setCategory(category, options: combinedOptions)
+      #if swift(>=6.0)
+        try session.setCategory(category as String, options: combinedOptions)
+      #else
+        try session.setCategory(category, options: combinedOptions)
+      #endif
     }
 
     public static func parse(args: [String: Any]) throws -> AudioContext? {
@@ -66,17 +88,17 @@ import MediaPlayer
     private static func parseCategory(category: String) throws -> AVAudioSession.Category? {
       switch category {
       case "ambient":
-        return .ambient
+        return kCategoryAmbient
       case "soloAmbient":
-        return .soloAmbient
+        return kCategorySoloAmbient
       case "playback":
-        return .playback
+        return kCategoryPlayback
       case "record":
-        return .record
+        return kCategoryRecord
       case "playAndRecord":
-        return .playAndRecord
+        return kCategoryPlayAndRecord
       case "multiRoute":
-        return .multiRoute
+        return kCategoryMultiRoute
       default:
         throw AudioPlayerError.error("Invalid Category \(category)")
       }
