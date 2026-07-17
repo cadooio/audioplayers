@@ -1,10 +1,12 @@
 import MediaPlayer
 
 #if os(iOS)
-  // Explicit import: the iPhoneOS 26.4 SDK no longer re-exports the AVFAudio
-  // Swift overlay through MediaPlayer, so AVAudioSession.Category degrades to
-  // its ObjC NSString typedef and loses .playback/.ambient/etc.
-  import AVFAudio
+  // Explicit import: on the iPhoneOS 26.4 SDK the AVAudioSession.Category
+  // struct refinement only comes in with AVFoundation's Swift overlay — via
+  // MediaPlayer (or bare AVFAudio) it degrades to the ObjC NSString typedef
+  // and loses .playback/.ambient/etc. flutter_tts compiles the same member
+  // syntax on this SDK with exactly this import.
+  import AVFoundation
   struct AudioContext {
     let category: AVAudioSession.Category
     let options: [AVAudioSession.CategoryOptions]
